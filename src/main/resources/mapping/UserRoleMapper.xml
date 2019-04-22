@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pv.productversion.mapper.UserRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.pv.productversion.entity.UserRoleKey" >
+    <id column="rid" property="rid" jdbcType="INTEGER" />
+    <id column="uid" property="uid" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="com.pv.productversion.entity.UserRoleKey" >
+    delete from user_role
+    where rid = #{rid,jdbcType=INTEGER}
+      and uid = #{uid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.pv.productversion.entity.UserRoleKey" >
+    insert into user_role (rid, uid)
+    values (#{rid,jdbcType=INTEGER}, #{uid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.pv.productversion.entity.UserRoleKey" >
+    insert into user_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="rid != null" >
+        rid,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="rid != null" >
+        #{rid,jdbcType=INTEGER},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <!--给用户配置角色-->
+  <insert id="setRoleForUser" parameterType="map">
+    insert into user_role(uid, rid) values
+    <foreach collection="roleIds" index="index" item="item" separator=",">
+      ( #{userId}, #{item} )
+    </foreach>
+  </insert>
+  <!-- 根据用户ID删除-->
+  <delete id="deleteByUserId">
+  	delete from user_role where uid = #{uid,jdbcType=BIGINT}
+  </delete>
+  <!--根据用户id查有没有角色id-->
+  <select id="findRoleIdByUserId" resultType="com.pv.productversion.entity.UserRoleKey">
+    select * from user_role where uid =  #{uid,jdbcType=BIGINT}
+  </select>
+</mapper>

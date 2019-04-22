@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pv.productversion.mapper.VersionMapper">
+  <resultMap id="BaseResultMap" type="com.pv.productversion.entity.Version">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="version_name" jdbcType="VARCHAR" property="versionName" />
+    <result column="version_code" jdbcType="VARCHAR" property="versionCode" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="is_delete" jdbcType="BIT" property="isDelete" />
+    <result column="is_check" jdbcType="BIT" property="isCheck" />
+  </resultMap>
+  <resultMap id="VersionProductMap" type="com.pv.productversion.entity.Version">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="version_name" jdbcType="VARCHAR" property="versionName" />
+    <result column="version_code" jdbcType="VARCHAR" property="versionCode" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="is_delete" jdbcType="BIT" property="isDelete" />
+    <result column="is_check" jdbcType="BIT" property="isCheck" />
+    <association property="product" javaType="com.pv.productversion.entity.Product">
+      <id property="id" column="pid"/>
+      <result property="name" column="name"/>
+      <result property="paltform" column="paltform"/>
+    </association>
+    <association property="label" javaType="com.pv.productversion.entity.VersionLabel">
+      <id property="id" column="lid"/>
+      <result property="label" column="label"/>
+      <result property="versionId" column="version_id"/>
+    </association>
+  </resultMap>
+  <resultMap id="RelatedMap" type="com.pv.productversion.entity.Version">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="version_name" jdbcType="VARCHAR" property="versionName" />
+    <result column="version_code" jdbcType="VARCHAR" property="versionCode" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <!--<result column="url" jdbcType="VARCHAR" property="url" />-->
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="is_delete" jdbcType="BIT" property="isDelete" />
+    <result column="is_check" jdbcType="BIT" property="isCheck" />
+    <association property="product" javaType="com.pv.productversion.entity.Product">
+      <id property="id" column="pid"/>
+      <result property="name" column="name"/>
+      <result property="paltform" column="paltform"/>
+    </association>
+    <collection property="children" ofType="com.pv.productversion.entity.Version"
+    column="id" select="selectRelated">
+    </collection>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, version_name, version_code, create_time, url, file_name, product_id, parent_id, 
+    is_delete,is_check
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from version
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from version
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.pv.productversion.entity.Version">
+    insert into version (id, version_name, version_code, 
+      create_time, url, file_name, 
+      product_id, parent_id, is_delete,is_check
+      )
+    values (#{id,jdbcType=BIGINT}, #{versionName,jdbcType=VARCHAR}, #{versionCode,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{url,jdbcType=VARCHAR}, #{fileName,jdbcType=VARCHAR}, 
+      #{productId,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{isDelete,jdbcType=BIT},#{isCheck,jdbcType=BIT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.pv.productversion.entity.Version" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into version
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="versionName != null">
+        version_name,
+      </if>
+      <if test="versionCode != null">
+        version_code,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+      <if test="fileName != null">
+        file_name,
+      </if>
+      <if test="productId != null">
+        product_id,
+      </if>
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="isDelete != null">
+        is_delete,
+      </if>
+      <if test="isCheck != null">
+        is_check,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="versionName != null">
+        #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="versionCode != null">
+        #{versionCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null">
+        #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null">
+        #{productId,jdbcType=BIGINT},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="isDelete != null">
+        #{isDelete,jdbcType=BIT},
+      </if>
+      <if test="isCheck != null">
+        #{isCheck,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.pv.productversion.entity.Version">
+    update version
+    <set>
+      <if test="versionName != null">
+        version_name = #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="versionCode != null">
+        version_code = #{versionCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="url != null">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null">
+        file_name = #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null">
+        product_id = #{productId,jdbcType=BIGINT},
+      </if>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="isDelete != null">
+        is_delete = #{isDelete,jdbcType=BIT},
+      </if>
+      <if test="isCheck != null">
+        is_check = #{isCheck,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.pv.productversion.entity.Version">
+    update version
+    set version_name = #{versionName,jdbcType=VARCHAR},
+      version_code = #{versionCode,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      url = #{url,jdbcType=VARCHAR},
+      file_name = #{fileName,jdbcType=VARCHAR},
+      product_id = #{productId,jdbcType=BIGINT},
+      parent_id = #{parentId,jdbcType=BIGINT},
+      is_delete = #{isDelete,jdbcType=BIT},
+      is_check = #{isCheck,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <!--没审核过的所有产品-->
+  <select id="allVersions" resultMap="VersionProductMap">
+   select v.*, p.id as pid ,p.name,p.paltform,l.id as lid,l.label,l.version_id
+    from (version as v , product as p)
+    left join version_label as l on v.id = l.version_id
+    where v.product_id = p.id and v.is_delete = 0 and v.is_check = 0
+    <if test="null != beginNumber and null != limit">
+      LIMIT #{beginNumber},#{limit}
+    </if>
+  </select>
+  <select id="countChecked" resultType="java.lang.Integer">
+    select count(*) from version where is_delete = 0 and is_check = 0
+  </select>
+  <update id="checked">
+     update version
+    set is_check = 1 where id = #{id}
+  </update>
+  <!--根据产品id查最新版本-->
+  <!--<select id="getLatestVersion" resultMap="VersionProductMap">-->
+    <!--select *-->
+    <!--from (select * from version order by create_time DESC)version-->
+    <!--where product_id = #{productId} and is_delete = 0 and is_check = 1-->
+    <!--limit 1-->
+    <!--</select>-->
+  <select id="getLatestVersion" resultMap="VersionProductMap">
+    select v.*,l.id as lid,l.label,l.version_id
+    from  version as v
+     left join version_label as l on v.id = l.version_id
+    where v.product_id = #{productId} and v.is_delete = 0 and v.is_check = 1
+    order by create_time DESC
+    limit 1
+    </select>
+  <!--获取树形版本号-->
+  <select id="treeVersion" resultMap="VersionProductMap">
+    select v.*,l.id as lid,l.label,l.version_id
+    from version as v
+     left join version_label as l on v.id = l.version_id
+    where v.product_id = #{productId} and v.is_delete = 0 and v.is_check = 1
+  </select>
+  <!--删产品的同时删产品所有版本号-->
+  <update id="deleteByProduct">
+    update version
+    set is_delete = 1
+    where product_id = #{productId}
+  </update>
+  <!--假删-->
+  <update id="isDelete">
+    update version
+    set is_delete = 1 where id = #{id}
+  </update>
+<!--获取一个产品的所有子版本号-->
+  <select id="listChildVersion" resultType="java.lang.String">
+    select version_code from version
+    where product_id = #{productId} and parent_id <![CDATA[<>]]> 0 and is_delete = 0 and is_check = 1
+    order by create_time desc
+  </select>
+  <!--where product_id = #{productId} and  parent_id <![CDATA[<>]]> 0 and is_delete = 0-->
+  <select id="getDescription" resultType="java.util.HashMap">
+    select v.version_code,d.id,d.type,d.content
+    FROM description as d
+        LEFT JOIN version as v ON d.version_id = v.id
+        WHERE v.id = #{versionId}
+  </select>
+
+  <!--关联-->
+  <select id="queryRelated" resultMap="RelatedMap">
+    select v.* ,p.id as pid ,p.name,p.paltform
+    from version as v ,version_related as vr, product as p
+    where v.id = vr.parent_id and v.product_id = p.id and v.id = #{versionId} and v.is_delete = 0
+  </select>
+  <select id="selectRelated" resultMap="RelatedMap">
+    select v.*,p.id as pid ,p.name,p.paltform
+    from version as v ,version_related as vr, product as p
+    where v.id = vr.version_id and v.product_id = p.id and vr.parent_id = #{versionId} and v.is_delete = 0
+  </select>
+<select id="selectall" resultMap="VersionProductMap">
+   select v.*,p.id as pid ,p.name,p.paltform
+    from version as v , product as p
+    where v.product_id = p.id  and v.is_delete = 0 and is_check = 1
+</select>
+</mapper>

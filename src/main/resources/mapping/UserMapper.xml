@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pv.productversion.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.pv.productversion.entity.User">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="BIT"/>
+    </resultMap>
+
+    <resultMap type="com.pv.productversion.entity.User" id="UserRolePermissionMap">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <collection property="roleList" column="id" javaType="list"
+                    select="com.pv.productversion.mapper.RoleMapper.selectAllRoles">
+        </collection>
+    </resultMap>
+
+    <resultMap id="UserRoleMap" type="com.pv.productversion.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <collection property="roleList" ofType="com.pv.productversion.entity.Role" column="id">
+            <id column="rid" property="id" jdbcType="INTEGER"/>
+            <result column="role" property="role" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, username, password, status
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.pv.productversion.entity.User">
+    insert into user (id, username, password, 
+      status)
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{status,jdbcType=BIT})
+  </insert>
+    <insert id="insertSelective" parameterType="com.pv.productversion.entity.User">
+        <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="password != null">
+                password,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.pv.productversion.entity.User">
+        update user
+        <set>
+            <if test="username != null">
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=BIT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.pv.productversion.entity.User">
+    update user
+    set username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      status = #{status,jdbcType=BIT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <!--登录验证-->
+    <select id="login" parameterType="com.pv.productversion.entity.User" resultMap="BaseResultMap">
+select * from user
+where username = #{username} and password = #{password}
+  </select>
+    <!--查询所有用户-->
+    <!--<select id="selectAll" resultMap="BaseResultMap">-->
+    <!--select * from user-->
+    <!--</select>-->
+    <select id="selectAll" resultMap="UserRoleMap">
+    select
+        user.id,
+        user.username,
+        user.password,
+        user.status,
+        role.id,
+        role.role
+    from user
+      left join user_role on user.id = user_role.uid
+      left join role on user_role.rid = role.id
+--       ORDER BY user.id ASC
+  </select>
+    <!--根据用户id查角色以及角色对应的权限-->
+    <select id="selectURP" resultMap="UserRolePermissionMap">
+   select * from  user where id=#{uid}
+</select>
+    <!--根据用户名查询-->
+    <select id="findByUsername" resultType="com.pv.productversion.entity.User">
+        SELECT
+        user.id,
+        user.username,
+        user.password,
+        user.status
+        FROM user
+        WHERE username=#{username}
+    </select>
+
+</mapper>

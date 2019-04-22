@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pv.productversion.mapper.PermissionMapper" >
+  <resultMap id="BaseResultMap" type="com.pv.productversion.entity.Permission" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="permission" property="permission" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, permission, description
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from permission
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from permission
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.pv.productversion.entity.Permission" >
+    insert into permission (id, permission, description
+      )
+    values (#{id,jdbcType=INTEGER}, #{permission,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.pv.productversion.entity.Permission" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="permission != null" >
+        permission,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="permission != null" >
+        #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.pv.productversion.entity.Permission" >
+    update permission
+    <set >
+      <if test="permission != null" >
+        permission = #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.pv.productversion.entity.Permission" >
+    update permission
+    set permission = #{permission,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <!--查询所有权限-->
+  <select id="findAll"  resultMap="BaseResultMap">
+    select * from permission
+  </select>
+  <!--根据角色id查询权限-->
+  <select id="findPermissionByRoleId" resultMap="BaseResultMap">
+    select
+    role.id,
+    role.role,
+    permission.id,
+    permission.permission,
+    permission.description
+    from (role,permission)
+    right join role_permission on permission.id = role_permission.pid and role.id = role_permission.rid
+    where role.id = #{rid}
+  </select>
+  <!--根据角色id查询权限(先从角色权限关联表查询角色id相等，在查询权限id，根据权限id在权限表里查询权限)-->
+  <select id="selectAllpermissions" resultType="com.pv.productversion.entity.Permission" parameterType="java.lang.Integer">
+        select id,permission,description from permission where id in (select role_permission.pid from role_permission where role_permission.rid=#{id})
+     </select>
+</mapper>

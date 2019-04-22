@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pv.productversion.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="com.pv.productversion.entity.Role">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+    </resultMap>
+    <!--角色-->
+    <resultMap id="RolesMap" type="com.pv.productversion.entity.Role">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+        <!--权限集合-->
+        <collection property="permissionList" column="id" javaType="list"
+                    select="com.pv.productversion.mapper.PermissionMapper.selectAllpermissions"></collection>
+    </resultMap>
+    <!--角色权限-->
+    <resultMap id="RolePermissionMap" type="com.pv.productversion.entity.Role">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+        <collection property="permissionList" column="id" ofType="com.pv.productversion.entity.Permission">
+            <id column="pid" property="id" jdbcType="INTEGER"/>
+            <result column="permission" property="permission" jdbcType="VARCHAR"/>
+            <result column="description" property="description" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, role
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from role
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.pv.productversion.entity.Role">
+    insert into role (id, role)
+    values (#{id,jdbcType=INTEGER}, #{role,jdbcType=VARCHAR})
+  </insert>
+    <insert id="insertSelective" parameterType="com.pv.productversion.entity.Role">
+        <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="role != null">
+                role,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="role != null">
+                #{role,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.pv.productversion.entity.Role">
+        update role
+        <set>
+            <if test="role != null">
+                role = #{role,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.pv.productversion.entity.Role">
+    update role
+    set role = #{role,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <!--查询所有角色-->
+    <select id="findAll" resultMap="RolePermissionMap">
+    select
+    role.id,
+    role.role,
+    permission.id,
+    permission.permission,
+    permission.description
+    from role
+    left join role_permission on role.id = role_permission.rid
+    left join permission on role_permission.pid = permission.id
+  </select>
+    <!--根据用户id查询角色-->
+    <select id="findRoleByUserId" resultMap="BaseResultMap">
+        select
+        user.id,
+        user.username,
+        user.password,
+        user.status,
+        role.id,
+        role.role
+        from user
+        right join user_role on user.id = user_role.uid
+        left join role on user_role.rid = role.id
+        where user.id = #{uid}
+    </select>
+    <!--根据用户名查询角色-->
+    <select id="findRoleByUsername" resultType="com.pv.productversion.entity.Role">
+        select
+        user.id,
+        user.username,
+        user.password,
+        user.status,
+        role.id,
+        role.role
+        from user
+        right join user_role on user.id = user_role.uid
+        left join role on user_role.rid = role.id
+        WHERE username=#{username}
+    </select>
+    <!--根据用户中的id查询角色-->
+    <select id="selectAllRoles" resultMap="RolesMap" parameterType="java.lang.Integer">
+        select id,role from role where id in (select user_role.rid from user_role where user_role.uid=#{id})
+    </select>
+
+</mapper>

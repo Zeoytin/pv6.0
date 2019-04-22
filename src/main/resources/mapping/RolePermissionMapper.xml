@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pv.productversion.mapper.RolePermissionMapper" >
+  <resultMap id="BaseResultMap" type="com.pv.productversion.entity.RolePermissionKey" >
+    <id column="pid" property="pid" jdbcType="INTEGER" />
+    <id column="rid" property="rid" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="com.pv.productversion.entity.RolePermissionKey" >
+    delete from role_permission
+    where pid = #{pid,jdbcType=INTEGER}
+      and rid = #{rid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.pv.productversion.entity.RolePermissionKey" >
+    insert into role_permission (pid, rid)
+    values (#{pid,jdbcType=INTEGER}, #{rid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.pv.productversion.entity.RolePermissionKey" >
+    insert into role_permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="pid != null" >
+        pid,
+      </if>
+      <if test="rid != null" >
+        rid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="pid != null" >
+        #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="rid != null" >
+        #{rid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <!--给角色配置权限-->
+  <insert id="setPermissionForRole" parameterType="map">
+    insert into role_permission(rid, pid) values
+    <foreach collection="permissionIds" index="index" item="item" separator=",">
+      ( #{roleId}, #{item} )
+    </foreach>
+  </insert>
+  <!-- 根据用户ID删除-->
+  <delete id="cleanRolePermission">
+  	delete from role_permission where rid = #{rid,jdbcType=BIGINT}
+  </delete>
+  <!--根据角色id查有没有权限id-->
+  <select id="findPerIdByRoleId" resultType="com.pv.productversion.entity.RolePermissionKey">
+    select * from role_permission where rid =  #{rid,jdbcType=BIGINT}
+  </select>
+</mapper>
